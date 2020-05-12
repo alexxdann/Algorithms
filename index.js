@@ -6,7 +6,7 @@ function randomDataSet(dataSetSize, minValue, maxValue) {
  });
 }
 
-const nums = randomDataSet(20, -1000, 1000);
+const nums = randomDataSet(10, -1000, 1000);
 
 class Sort {
  #_arr = [];
@@ -17,6 +17,7 @@ class Sort {
   this._selectionSortReqursionCount = 0;
   this._selectionSortLoopsCount = 0;
   this._bubbleSortCount = 0;
+  this._coctailSortCount = 0;
  }
 
  switchValues(i1,i2) {
@@ -29,10 +30,9 @@ class Sort {
   return typeof val === typeof this.#_arr[0];
  }
 
- // 10 input -> _selectionSortLoopsCount: 45
- // 20 input -> _selectionSortLoopsCount: 190
- // 100 input -> _selectionSortLoopsCount: 4950
- // 1000 input -> _selectionSortLoopsCount: 499500
+ // 10 input -> 45
+ // 100 input -> 4950
+ // 1000 input -> 499500
  selectionSortLoops(isInit=true) {
   if(isInit) {
    this.#_tempArr = Array.from(this.#_arr);
@@ -56,7 +56,6 @@ class Sort {
    };
 
    for(let k = i+1; k<arr.length; k++) {
-    this._selectionSortLoopsCount++;
     let nextVal = arr[k];
     if(!this.checkForZeroOrdiffType(nextVal)) {
      continue;
@@ -71,6 +70,7 @@ class Sort {
       minObj.i = k;
      }
     }
+    this._selectionSortLoopsCount++;
    }
 
    if (minObj.i) {
@@ -79,8 +79,7 @@ class Sort {
   }
  }
  
- // 10 input -> _selectionSortReqursionCount: 55
- // 20 input -> _selectionSortReqursionCount: 210
+
  // don't work on 10000 inputs / Badly bad
  selectionSortReqursion(startIndex=0, isInit=true) { // in this case reurn doesn't work, looks like some async issue
   if(isInit) {
@@ -92,7 +91,6 @@ class Sort {
   let arr = this.#_tempArr;
 
   for(let i = startIndex; i<arr.length; i++) {
-   this._selectionSortReqursionCount++;
    let currentVal = arr[i];
    let rightIndex = i+1;
    let rightVal = arr[rightIndex];
@@ -115,6 +113,7 @@ class Sort {
      minValIndex = rightIndex;
     }
    }
+   this._selectionSortReqursionCount++;
   }
 
   if(startIndex === arr.length-1) {
@@ -131,10 +130,9 @@ class Sort {
   }
  }
 
- // 10 input -> _selectionSortReqursionCount: 54
- // 20 input -> _selectionSortReqursionCount: 209
- // 100 input -> _selectionSortReqursionCount: 5049
- // 1000 input -> _selectionSortReqursionCount: 500499
+ // 10 input -> 99
+ // 100 input -> 9999
+ // 1000 input -> 999999
  bubbleSort(isInit=true){
   if(isInit) {
    this.#_tempArr = Array.from(this.#_arr);
@@ -150,7 +148,6 @@ class Sort {
    }
 
    for(let i = arr.length-1; i>=0; i--) {
-    this._bubbleSortCount++;
     let currentVal = arr[i];
     let nextVal = arr[i-1];
 
@@ -164,6 +161,61 @@ class Sort {
     if(nextVal>currentVal) {
      this.switchValues(i-1, i);
     }
+    this._bubbleSortCount++;
+   }
+  }
+ }
+
+ // 10 input -> 45
+ // 100 input -> 4950
+ // 1000 input -> 499500
+ coctailSort(isInit=true) {
+  if(isInit) {
+   this.#_tempArr = Array.from(this.#_arr);
+   this._coctailSortCount = 0;
+  }
+  let arr = this.#_tempArr;
+  let sortedCountMin = 0;
+  let sortedCountMax = 0;
+
+  while (true) {
+   if (sortedCountMax === arr.length-1 || sortedCountMax > arr.length**3) {
+    this.#_tempArr = Array.from(this.#_arr);
+    return arr;
+   }
+   for(let i = sortedCountMin; i<arr.length; i++) {
+    let currentVal = arr[i];
+    let nextVal = arr[i-1];
+
+    if (i === sortedCountMax) {
+     sortedCountMax++;
+     break;
+    }
+    if(!this.checkForZeroOrdiffType(nextVal)) {
+     continue;
+    }
+    if(nextVal>currentVal) {
+     this.switchValues(i-1, i);
+    }
+    this._coctailSortCount++;
+   }
+   
+   for(let i = arr.length-1; i>=0; i--) {
+    this._bubbleSortCount++;
+    let currentVal = arr[i];
+    let nextVal = arr[i-1];
+
+    if (i === sortedCountMin) {
+     sortedCountMin++;
+     break;
+    }
+    if(!this.checkForZeroOrdiffType(nextVal)) {
+     continue;
+    }
+    if(nextVal>currentVal) {
+     this.switchValues(i-1, i);
+    }
+    this._coctailSortCount++;
    }
   }
  }
@@ -175,11 +227,13 @@ console.log(sort);
 // let selectionSortedReqursion = sort.selectionSortReqursion();
 let selectionSortedLoops = sort.selectionSortLoops();
 let bubbleSorted = sort.bubbleSort();
+let coctailSorted = sort.coctailSort();
 
 console.log('sort', sort);
 // console.log('selectionSortedReqursion', selectionSortedReqursion); // Reqursion doesn't return
 console.log('selectionSortedLoops', selectionSortedLoops);
 console.log('bubbleSorted', bubbleSorted);
+console.log('coctailSorted', coctailSorted);
 
 var end = 'end';
 
