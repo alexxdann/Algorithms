@@ -1,6 +1,12 @@
 // 'use strict';
 
-const nums = [22, 5, 1, 2, 10, 3, -2, 19, 1000, 6, 5 ,23, 11, 0, 100, 1];
+function randomDataSet(dataSetSize, minValue, maxValue) {
+ return new Array(dataSetSize).fill(0).map(function(n) {
+   return parseInt(Math.random() * (maxValue - minValue) + minValue);
+ });
+}
+
+const nums = randomDataSet(20, -1000, 1000);
 
 class Sort {
  #_arr = [];
@@ -8,8 +14,9 @@ class Sort {
  constructor(arr) {
   this.#_arr = arr;
   this.#_tempArr = Array.from(arr);
-  this._selectionSortLoopsCount = 0;
   this._selectionSortReqursionCount = 0;
+  this._selectionSortLoopsCount = 0;
+  this._bubbleSortCount = 0;
  }
 
  switchValues(i1,i2) {
@@ -22,7 +29,10 @@ class Sort {
   return typeof val === typeof this.#_arr[0];
  }
 
- // 20 input -> _selectionSortLoopsCount: 120
+ // 10 input -> _selectionSortLoopsCount: 45
+ // 20 input -> _selectionSortLoopsCount: 190
+ // 100 input -> _selectionSortLoopsCount: 4950
+ // 1000 input -> _selectionSortLoopsCount: 499500
  selectionSortLoops(isInit=true) {
   if(isInit) {
    this.#_tempArr = Array.from(this.#_arr);
@@ -33,6 +43,7 @@ class Sort {
 
   for(let i = 0; i<arr.length; i++) {
    if(i === arr.length-1) {
+    this.#_tempArr = Array.from(this.#_arr);
     return arr;
    }
 
@@ -67,7 +78,10 @@ class Sort {
    }
   }
  }
- // 20 input -> _selectionSortReqursionCount: 136
+ 
+ // 10 input -> _selectionSortReqursionCount: 55
+ // 20 input -> _selectionSortReqursionCount: 210
+ // don't work on 10000 inputs / Badly bad
  selectionSortReqursion(startIndex=0, isInit=true) { // in this case reurn doesn't work, looks like some async issue
   if(isInit) {
    this.#_tempArr = Array.from(this.#_arr);
@@ -92,7 +106,6 @@ class Sort {
     let minVal = arr[minValIndex];
     let nextIndex = minVal > rightVal ? rightIndex : minValIndex;
     let nextVal = arr[nextIndex];
-
     if (currentVal > nextVal) {
      minValIndex = nextIndex;
     }
@@ -105,7 +118,7 @@ class Sort {
   }
 
   if(startIndex === arr.length-1) {
-   console.log(arr);
+   console.log('reqursion', arr);
    return arr;
   }
 
@@ -117,17 +130,56 @@ class Sort {
    this.selectionSortReqursion(++startIndex,false);
   }
  }
+
+ // 10 input -> _selectionSortReqursionCount: 54
+ // 20 input -> _selectionSortReqursionCount: 209
+ // 100 input -> _selectionSortReqursionCount: 5049
+ // 1000 input -> _selectionSortReqursionCount: 500499
+ bubbleSort(isInit=true){
+  if(isInit) {
+   this.#_tempArr = Array.from(this.#_arr);
+   this._bubbleSortCount = 0;
+  }
+  let arr = this.#_tempArr;
+  let sortedCount = 0;
+
+  while (true) {
+   if (sortedCount === arr.length-1 || sortedCount > arr.length**3) {
+    this.#_tempArr = Array.from(this.#_arr);
+    return arr;
+   }
+
+   for(let i = arr.length-1; i>=0; i--) {
+    this._bubbleSortCount++;
+    let currentVal = arr[i];
+    let nextVal = arr[i-1];
+
+    if (i === sortedCount) {
+     sortedCount++;
+     break;
+    }
+    if(!this.checkForZeroOrdiffType(nextVal)) {
+     continue;
+    }
+    if(nextVal>currentVal) {
+     this.switchValues(i-1, i);
+    }
+   }
+  }
+ }
 }
 
 let sort = new Sort(nums);
 console.log(sort);
 
+// let selectionSortedReqursion = sort.selectionSortReqursion();
 let selectionSortedLoops = sort.selectionSortLoops();
-let selectionSortedReqursion = sort.selectionSortReqursion();
+let bubbleSorted = sort.bubbleSort();
 
-console.log(sort);
-console.log(selectionSortedLoops);
-console.log(selectionSortedReqursion);
+console.log('sort', sort);
+// console.log('selectionSortedReqursion', selectionSortedReqursion); // Reqursion doesn't return
+console.log('selectionSortedLoops', selectionSortedLoops);
+console.log('bubbleSorted', bubbleSorted);
 
 var end = 'end';
 
