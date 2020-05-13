@@ -1,12 +1,14 @@
 // 'use strict';
 
 function randomDataSet(dataSetSize, minValue, maxValue) {
- return new Array(dataSetSize).fill(0).map(function(n) {
-   return parseInt(Math.random() * (maxValue - minValue) + minValue);
- });
+ return new Array(dataSetSize).fill(0).map(()=>parseInt(Math.random() * (maxValue - minValue) + minValue));
 }
 
-const nums = randomDataSet(10, -1000, 1000);
+function isSorted(arr) {
+ return arr.every((v,i)=>(i === 0 || v <= arr[i - 1])) || arr.every((v, i) => (i === 0 || v >= arr[i - 1]));
+}
+
+const nums = randomDataSet(100, -1000, 1000);
 
 class Sort {
  #_arr = [];
@@ -130,9 +132,9 @@ class Sort {
   }
  }
 
- // 10 input -> 99
- // 100 input -> 9999
- // 1000 input -> 999999
+ // 10 input -> 45
+ // 100 input -> 4950
+ // 1000 input -> 499500
  bubbleSort(isInit=true){
   if(isInit) {
    this.#_tempArr = Array.from(this.#_arr);
@@ -142,15 +144,14 @@ class Sort {
   let sortedCount = 0;
 
   while (true) {
-   if (sortedCount === arr.length-1 || sortedCount > arr.length**3) {
+   if (sortedCount === arr.length-1 || this._bubbleSortCount > arr.length**3) {
     this.#_tempArr = Array.from(this.#_arr);
     return arr;
    }
 
-   for(let i = arr.length-1; i>=0; i--) {
+   for(let i = arr.length-1; i>=sortedCount; i--) {
     let currentVal = arr[i];
     let nextVal = arr[i-1];
-
     if (i === sortedCount) {
      sortedCount++;
      break;
@@ -166,9 +167,7 @@ class Sort {
   }
  }
 
- // 10 input -> 45
- // 100 input -> 4950
- // 1000 input -> 499500
+ // Non stable
  coctailSort(isInit=true) {
   if(isInit) {
    this.#_tempArr = Array.from(this.#_arr);
@@ -176,54 +175,61 @@ class Sort {
   }
   let arr = this.#_tempArr;
   let sortedCountMin = 0;
-  let sortedCountMax = 0;
+  let sortedCountMax = arr.length-1;
+  let stop = false;
 
   while (true) {
-   if (sortedCountMax === arr.length-1 || sortedCountMax > arr.length**3) {
+   if ((sortedCountMin === arr.length-1 || sortedCountMax === 0) || sortedCountMin === sortedCountMax || this._coctailSortCoun > arr.length**3 || stop) {
     this.#_tempArr = Array.from(this.#_arr);
     return arr;
    }
-   for(let i = sortedCountMin; i<arr.length; i++) {
+
+   let stopMin = true;
+   let stopMax = true;
+
+   for(let i=sortedCountMin; i<sortedCountMax; i++) {
     let currentVal = arr[i];
-    let nextVal = arr[i-1];
+    let nextVal = arr[i+1];
 
     if (i === sortedCountMax) {
-     sortedCountMax++;
-     break;
+      sortedCountMax--;
+      break;
     }
+
     if(!this.checkForZeroOrdiffType(nextVal)) {
      continue;
     }
-    if(nextVal>currentVal) {
-     this.switchValues(i-1, i);
+    if(currentVal>nextVal) {
+     stopMin = false;
+     this.switchValues(i, i+1);
     }
     this._coctailSortCount++;
    }
    
-   for(let i = arr.length-1; i>=0; i--) {
-    this._bubbleSortCount++;
+   for(let i=sortedCountMax-1; i>=sortedCountMin; i--) {
     let currentVal = arr[i];
     let nextVal = arr[i-1];
 
     if (i === sortedCountMin) {
-     sortedCountMin++;
-     break;
+      sortedCountMin++;
+      break;
     }
     if(!this.checkForZeroOrdiffType(nextVal)) {
      continue;
     }
     if(nextVal>currentVal) {
-     this.switchValues(i-1, i);
+     stopMax = true;
+     this.switchValues(i, i-1);
     }
     this._coctailSortCount++;
    }
+
+   stop = stopMin && stopMax;
   }
  }
 }
 
 let sort = new Sort(nums);
-console.log(sort);
-
 // let selectionSortedReqursion = sort.selectionSortReqursion();
 let selectionSortedLoops = sort.selectionSortLoops();
 let bubbleSorted = sort.bubbleSort();
@@ -232,8 +238,11 @@ let coctailSorted = sort.coctailSort();
 console.log('sort', sort);
 // console.log('selectionSortedReqursion', selectionSortedReqursion); // Reqursion doesn't return
 console.log('selectionSortedLoops', selectionSortedLoops);
+console.log(isSorted(selectionSortedLoops));
 console.log('bubbleSorted', bubbleSorted);
+console.log(isSorted(bubbleSorted));
 console.log('coctailSorted', coctailSorted);
+console.log(isSorted(coctailSorted));
 
 var end = 'end';
 
